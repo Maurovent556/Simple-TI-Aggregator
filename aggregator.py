@@ -2,7 +2,7 @@ import requests
 import csv
 from datetime import datetime
 
-# 1. Le tue chiavi di accesso
+# 1. Le chiavi di accesso
 OTX_API_KEY = "INSERISCI_QUI_LA_TUA_CHIAVE_ALIENVAULT"
 ABUSE_API_KEY = "INSERISCI_QUI_LA_TUA_CHIAVE_ABUSEIPDB"
 
@@ -27,20 +27,20 @@ if response_otx.status_code == 200:
                 ip_malevoli_unici.add(indicatore.get("indicator"))
 
     lista_ip = list(ip_malevoli_unici)
-    print(f"✅ Trovati {len(lista_ip)} IP unici.\n")
+    print(f" Trovati {len(lista_ip)} IP unici.\n")
 
     # --- PARTE 2: ARRICCHIMENTO E SALVATAGGIO ---
     print("2. Arricchimento dati e generazione del file CSV in corso...")
     url_abuse = "https://api.abuseipdb.com/api/v2/check"
     headers_abuse = {'Accept': 'application/json', 'Key': ABUSE_API_KEY}
 
-    # Apriamo un file CSV e prepariamoci a scrivere
+    # file CSV 
     with open(nome_file_csv, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file, delimiter=';')  # Usiamo il punto e virgola per separare le colonne
         # Scriviamo la riga di intestazione (i titoli delle colonne)
         writer.writerow(["Data Rilevamento", "Indirizzo IP", "Punteggio AbuseIPDB", "Nazione", "ISP"])
 
-        # Ora passiamo tutti gli IP al setaccio
+        
         for ip in lista_ip:
             parametri = {'ipAddress': ip, 'maxAgeInDays': '90'}
             response_abuse = requests.get(url_abuse, headers=headers_abuse, params=parametri)
@@ -51,13 +51,13 @@ if response_otx.status_code == 200:
                 nazione = dati_abuse['countryCode']
                 isp = dati_abuse['isp']
 
-                # Scriviamo i dati di questo IP nel file CSV!
+                # dati di questo IP nel file CSV!
                 writer.writerow([data_odierna, ip, f"{score}%", nazione, isp])
             else:
                 writer.writerow([data_odierna, ip, "Errore API", "N/A", "N/A"])
 
-    print(f"🎉 Finito! È stato creato il file: {nome_file_csv}")
+    print(f" Finito! È stato creato il file: {nome_file_csv}")
     print("Aprilo dal pannello di sinistra di PyCharm o dalla cartella del tuo computer.")
 
 else:
-    print("❌ Errore durante la connessione ad AlienVault.")
+    print(" Errore durante la connessione ad AlienVault.")
